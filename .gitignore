@@ -1,0 +1,14 @@
+# Sistema Operativo (Windows / macOS)
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Variables de entorno para Podman Compose (si creas un .env en la raíz)
+.env
+.env.local
+
+# Configuraciones locales del IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json

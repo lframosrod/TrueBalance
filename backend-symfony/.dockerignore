@@ -1,0 +1,5 @@
+# backend-symfony/.dockerignore
+vendor/
+var/
+.env.local
+.git/

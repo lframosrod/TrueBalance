@@ -1,0 +1,94 @@
+services:
+  database:
+    image: docker.io/library/postgres:16-alpine
+    container_name: truebalance_db
+    environment:
+      POSTGRES_USER: symfony
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: truebalance
+    # Aislado: Sin "ports:" hacia el exterior, solo accesible desde truebalance_net
+    networks:
+      - truebalance_net
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U symfony -d truebalance"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: docker.io/dpage/pgadmin4:latest
+    container_name: truebalance_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@truebalance.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - truebalance_net
+    depends_on:
+      database:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend-symfony
+      dockerfile: Dockerfile
+    container_name: truebalance_backend
+    working_dir: /app
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: "postgresql://symfony:secretpassword@database:5432/truebalance?serverVersion=16&charset=utf8"
+    # PHP-FPM tampoco necesita exponerse al host; solo Nginx habla con él por la red interna
+    volumes:
+      - ./backend-symfony:/app
+      - backend_vendor:/app/vendor
+    networks:
+      - truebalance_net
+    depends_on:
+      database:
+        condition: service_healthy
+
+  nginx:
+    image: docker.io/library/nginx:stable-alpine
+    container_name: truebalance_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend-symfony:/app:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - truebalance_net
+    depends_on:
+      - backend
+
+  frontend:
+    image: docker.io/library/node:20-alpine
+    container_name: truebalance_frontend
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend-vue:/app
+      - frontend_node_modules:/app/node_modules
+    networks:
+      - truebalance_net
+    depends_on:
+      - nginx
+
+networks:
+  truebalance_net:
+    driver: bridge
+
+volumes:
+  db_data:
+  pgadmin_data:
+  backend_vendor:
+  frontend_node_modules:

@@ -1,0 +1,28 @@
+# Archivos de entorno locales con credenciales reales
+/.env.local
+/.env.local.php
+/.env.*.local
+
+# Dependencias y caché de Symfony
+/vendor/
+/var/
+/public/bundles/
+
+# Llaves criptográficas de JWT (vital para cuando instalemos LexikJWT)
+/config/jwt/*.pem
+
+# Archivos de pruebas y caché del sistema
+/.phpunit.result.cache
+/phpunit.xml
+Thumbs.db
+.DS_Store
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
