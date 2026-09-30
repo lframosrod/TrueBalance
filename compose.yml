@@ -46,6 +46,7 @@ services:
     volumes:
       - ./backend-symfony:/app
       - backend_vendor:/app/vendor
+      - backend_var:/app/var
     networks:
       - truebalance_net
     depends_on:
@@ -91,4 +92,5 @@ volumes:
   db_data:
   pgadmin_data:
   backend_vendor:
+  backend_var:
   frontend_node_modules:
