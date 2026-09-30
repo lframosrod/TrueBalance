@@ -1,0 +1,16 @@
+{
+    "problems.decorations.enabled": false,
+    "files.watcherExclude": {
+        "**/vendor/**": true,
+        "**/node_modules/**": true,
+        "**/var/**": true
+    },
+    "search.exclude": {
+        "**/vendor/**": true,
+        "**/node_modules/**": true,
+        "**/var/**": true
+    },
+    "php.problems.exclude": {
+        "**/vendor/**": true
+    }
+}
