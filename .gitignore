@@ -9,6 +9,4 @@ desktop.ini
 
 # Configuraciones locales del IDE
 .idea/
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
+.vscode/
