@@ -9,26 +9,34 @@ const authStore = useAuthStore()
 
 const isRegisterMode = ref(false)
 const name = ref('')
-const email = ref('demo@truebalance.com')
-const password = ref('password123')
+const email = ref('')
+const password = ref('')
 const errorMsg = ref('')
 const submitting = ref(false)
+
+function toggleMode() {
+  isRegisterMode.value = !isRegisterMode.value
+  errorMsg.value = ''
+  name.value = ''
+  email.value = ''
+  password.value = ''
+}
 
 async function handleSubmit() {
   errorMsg.value = ''
   submitting.value = true
   try {
     if (isRegisterMode.value) {
-      await authStore.register(name.value, email.value, password.value)
+      await authStore.register(name.value.trim(), email.value.trim(), password.value)
     } else {
-      await authStore.login(email.value, password.value)
+      await authStore.login(email.value.trim(), password.value)
     }
     router.push('/')
   } catch (err: any) {
     errorMsg.value =
       err.response?.data?.error ||
       err.response?.data?.message ||
-      'Credenciales inválidas o error de conexión con el servidor.'
+      'Credenciales inválidas o error al procesar la solicitud.'
   } finally {
     submitting.value = false
   }
@@ -77,6 +85,7 @@ async function handleSubmit() {
             v-model="name"
             type="text"
             required
+            autocomplete="name"
             placeholder="Ej. Alex Ramos"
             class="w-full rounded-lg border border-slate-700 bg-slate-800/70 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
           />
@@ -88,6 +97,7 @@ async function handleSubmit() {
             v-model="email"
             type="email"
             required
+            autocomplete="email"
             placeholder="tu@correo.com"
             class="w-full rounded-lg border border-slate-700 bg-slate-800/70 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
           />
@@ -100,7 +110,8 @@ async function handleSubmit() {
             type="password"
             required
             minlength="6"
-            placeholder="••••••••"
+            autocomplete="current-password"
+            placeholder="Mínimo 6 caracteres"
             class="w-full rounded-lg border border-slate-700 bg-slate-800/70 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
           />
         </div>
@@ -120,7 +131,7 @@ async function handleSubmit() {
         {{ isRegisterMode ? '¿Ya tienes una cuenta?' : '¿Aún no tienes cuenta?' }}
         <button
           type="button"
-          @click="isRegisterMode = !isRegisterMode"
+          @click="toggleMode"
           class="ml-1 font-medium text-indigo-400 hover:text-indigo-300"
         >
           {{ isRegisterMode ? 'Inicia sesión' : 'Regístrate gratis' }}
