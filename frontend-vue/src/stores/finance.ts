@@ -8,9 +8,11 @@ export const useFinanceStore = defineStore('finance', () => {
   const transactions = ref<Transaction[]>([])
   const summary = ref<FinancialSummary | null>(null)
   const loading = ref(false)
+  const activeRange = ref<{ startDate?: string; endDate?: string }>({})
 
   async function fetchDashboardData(startDate?: string, endDate?: string) {
     loading.value = true
+    activeRange.value = { startDate, endDate }
     try {
       const params = startDate && endDate ? { startDate, endDate } : {}
       const [catsRes, txRes, sumRes] = await Promise.all([
@@ -26,6 +28,10 @@ export const useFinanceStore = defineStore('finance', () => {
     }
   }
 
+  async function refreshCurrentView() {
+    await fetchDashboardData(activeRange.value.startDate, activeRange.value.endDate)
+  }
+
   async function addTransaction(payload: {
     amount: number
     categoryId: number
@@ -33,12 +39,12 @@ export const useFinanceStore = defineStore('finance', () => {
     transactionDate: string
   }) {
     await apiClient.post('/transactions', payload)
-    await fetchDashboardData()
+    await refreshCurrentView()
   }
 
   async function removeTransaction(id: number) {
     await apiClient.delete(`/transactions/${id}`)
-    await fetchDashboardData()
+    await refreshCurrentView()
   }
 
   async function addCategory(payload: {
@@ -47,8 +53,9 @@ export const useFinanceStore = defineStore('finance', () => {
     color: string
     icon: string
   }) {
-    await apiClient.post('/categories', payload)
-    await fetchDashboardData()
+    const { data } = await apiClient.post<Category>('/categories', payload)
+    await refreshCurrentView()
+    return data
   }
 
   return {
